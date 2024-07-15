@@ -1,5 +1,9 @@
+# Functions for LTR annotation evaluation
+
+
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   # from http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
+  # this function is used to plot multiple ggplot2 plots on one page
   library(grid)
 
   # Make a list from the ... arguments and plotlist
@@ -36,10 +40,11 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 }
 
 trim_gr <- function (grA, grMask){
-  # this function trims genomicragnes in grA by genomicranges in grMask
+  # this function trims genomic ranges in grA by genomic ranges in grMask
   # metadata is preserved, if the resulting range is empty, reange is removed completelly
   # uses bedtools substract
 
+  # for testing:
   #grA = GRanges("chr1", IRanges(start = c(1, 10, 20, 30, 50, 60), width = c(5, 5, 5, 5, 5, 5)))
   #grA$Name= c("A", "B", "C", "D", "E", "F")
   #grMask = GRanges("chr1", IRanges(start = c(4, 20,55, 59), width = c(8,8,7,8)))
@@ -61,7 +66,12 @@ trim_gr <- function (grA, grMask){
   unlink(tmp_out)
   return(gr_out)
 }
+
+
+
 clean_gff <- function(gr, cls){
+  # this function standardizes names of LTR elements for annotation from
+  # different sources (inpactor, dante, EDTA, RM)
   if (is.null(gr$source)){
     print(2)
     ## this is inpactor
@@ -101,7 +111,12 @@ clean_gff <- function(gr, cls){
   #gr = reduce(gr)
   return(gr)
 }
+
+
 get_stat <- function(test, ref, genome_size){
+  # this function calculates statistics of for comparison of reference and test annotation
+  # TP - true positive, FN - false negative, FP - false positive, TN - true negative
+  # sens - sensitivity, spec - specificity, accu - accuracy, prec - precision, FDR - false discovery rate, F1 - F1 score
   TP <- sum(width(GenomicRanges::intersect(test, ref, ignore.strand=TRUE)))
   FN <- sum(width(trim_gr(ref, test)))
   FP <- sum(width(trim_gr(test, ref)))
@@ -117,11 +132,13 @@ get_stat <- function(test, ref, genome_size){
 
 
 get_FP <- function(test, ref){
+  # this function returns false positive genomic ranges compared to reference annotation
   gr_fp <- trim_gr(test, ref)
   return(gr_fp)
 }
 
 plot_stats <- function(x, logax=''){
+  # this function plots statistics of annotation comparison
   y <- do.call(rbind, x)
   par(mfrow = c(2,1))
   barplot(y[,1:4], beside = TRUE, col=1:nrow(y), log=logax)
@@ -131,7 +148,7 @@ plot_stats <- function(x, logax=''){
 }
 
 get_only_intact <- function(gr){
-  # keep only feature for full elements, remove subfeatures
+  # keep only feature for full elements, remove subfeatures from genomic ranges (gff)
   if (!is.null(gr$Rank)){
     return(gr[gr$Rank != "D" & gr$type=="transposable_element"])
   }
@@ -145,20 +162,10 @@ get_only_intact <- function(gr){
 }
 
 
-## compare_ltr = function(gr_list){
-##   gr_all = reduce(unlist(GRangesList(gr_list)))
-##   ovlp = matrix(data=0, ncol=length(gr_list), nrow=length(gr_all))
-##   colnames(ovlp) = names(gr_list)
-##   for (i in names(gr_list)){
-##     ovlp[to(findOverlaps(gr_list[[i]], gr_all, minoverlap = 1500)),i] = 1
-##   }
-##   ovlp_domains = rep(0, length(gr_all))
-##                                         # count domains
-##   Nd = tabulate(to(findOverlaps(dante, gr_all)))
-##   ovlp_domains[1:length(Nd)] = Nd
-## }
 
 compare_two_ltr_sets <- function(gr1, gr2){
+  # this function compares two LTR annotation sets
+  # and returns  number of overlapping elements and number of elements in each set
   p <- findOverlaps(gr1, gr2)
   w1 <- width(gr1[from(p)])
   w2 <- width(gr2[to(p)])
@@ -171,6 +178,7 @@ compare_two_ltr_sets <- function(gr1, gr2){
 }
 
 get_ranges_from_cluster <- function(x){
+  # helper function for compare_ltr
   p <- findOverlapPairs(x)
   pi <- findOverlaps(x)
   W1 <- width(x[from(pi)])
@@ -183,18 +191,23 @@ get_ranges_from_cluster <- function(x){
 }
 
 get_overlap_proportion <- function(gr_list){
+  # this function calculates overlap proportion of genomic ranges in a list
   grc <- unlist(GRangesList(gr_list))
   ovlp <- findOverlapPairs(grc)
   s1 <- start(ovlp@first)
   e1 <- end(ovlp@first)
   s2 <- start(ovlp@second)
   e2 <- end(ovlp@second)
-  # calculate overlap proportion os percent of overlap size over shorted interval, use start and end positions
+  # calculate overlap proportion as percent of overlap size over shorted interval, use start and end positions
   ovlp_prop <- width(pintersect(ovlp))/ifelse((e1-s1) < (e2 - s2), e1-s1 + 1, e2-s2 + 1)
   ovlp_prop
 }
 
 compare_ltr <- function(gr_list){
+  # this function compares LTR annotation sets
+  # input is list of genomic ranges
+  # output is list of unique genomic ranges and matrix of overlaps which is used for venn diagram
+
   grc <- unlist(GRangesList(gr_list))
   gr_all <- GenomicRanges::reduce(grc, with.revmap=TRUE, ignore.strand=TRUE)
   ## analyze clusters:
@@ -231,6 +244,8 @@ compare_ltr <- function(gr_list){
 }
 
 resolve_name <- function(x){
+  # Function which is used to resolve name for ovelaping annotations
+  # this is suitable for annotation where annotations levels are separated by "|"
   if (length(x)==1){
                                         # no conflict
     return(x)
@@ -249,6 +264,8 @@ resolve_name <- function(x){
 }
 
 resolve_name_wicker <- function(x){
+  # Function which is used to resolve name for ovelaping annotations
+  # this is suitable for annotation which follows Wicker's classification
   if (length(x)==1){
     return(x)
   } else{
@@ -271,6 +288,7 @@ resolve_name_wicker <- function(x){
   }
 }
 
+# helper function for quality filtering and DANTE annotation
 dante_filtering <- function(dante_gff, min_similarity=0.4,
                             min_identity=0.2, Relative_Length=0.6,
                             min_relat_interuptions=8) {
@@ -285,6 +303,9 @@ dante_filtering <- function(dante_gff, min_similarity=0.4,
 
 
 append_dante_classification <- function(gr, dante, te_domain_info){
+  # this function is used to classify LTR annotation using DANTE  annotation
+  # is used to classify Inpactor2 or EDTA annotation by DANTE annotation
+
   ## filter dante --
   dante_f <- dante_filtering(dante)
   #ovl = findOverlaps(gr, dante_f, type = 'within')
@@ -308,12 +329,12 @@ append_dante_classification <- function(gr, dante, te_domain_info){
   gr$domain_completeness[as.numeric(names(ndomains))] <- domain_completenes
   gr$domain_duplication[as.numeric(names(ndomains))] <- domain_duplication
   gr$domain_names[as.numeric(names(ndomains))] <- domain_names
-
   return(gr)
-
 }
 
+
 venn_counts_from_list <- function(venn_list){
+  # This function calculates counts for venn diagram from list of sets
   N <- length(venn_list)
   counts <- c(All = length(unique(unlist(venn_list))))
   for (i in 1:(N-1)){
@@ -329,6 +350,7 @@ venn_counts_from_list <- function(venn_list){
 
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   # from http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
+  # this function is used to plot multiple ggplot2 plots on one page
   library(grid)
 
   # Make a list from the ... arguments and plotlist
@@ -365,6 +387,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 }
 
 class_summary <- function(info, cols = c('edta', 'dante_ltr', 'dante_ltr_clean', 'inpactor')){
+  # this function calculates summary of classification for different methods
   cls <- sort(unique(info$classification))
   cls_counts <- c(table(factor(info$classification, levels = cls)))
   df <- data.frame(Annotation=cls, total = cls_counts)
@@ -375,6 +398,9 @@ class_summary <- function(info, cols = c('edta', 'dante_ltr', 'dante_ltr_clean',
 }
 
 domain_completeness <- function(info, cols){
+  # this function calculates domain completeness for different methods
+  # domain completenes is calculated as number of domains present in annotation
+  # divided by maximum number of domains for given lineage
   dc <- list()
   for (n in cols){
     x <- info$domain_completeness[mcols(info)[, n] == 1]
@@ -394,6 +420,9 @@ domain_completeness <- function(info, cols){
 }
 
 get_venn_without_domain_conflict <- function(info, cols){
+  # this function calculates venn diagram counts for different methods
+  # but excludes annotations with domain conflict (if two different domain points to
+  # distinct lineage levele classification)
   is_conflict <- info$domain_completeness == 0 & info$ndomains > 0
   vl <- list()
   for (n in cols){
@@ -403,6 +432,7 @@ get_venn_without_domain_conflict <- function(info, cols){
 }
 
 adjust_names <- function (g){
+  # adjust namees in annotation to be consistent between different sources
   if (is.null(g$source)){
     #  it is Inpactor2
     new_name <- ifelse(grepl("RLC", g$Name), "Class_I|LTR|Ty1/copia", g$Name)
@@ -440,6 +470,7 @@ adjust_names <- function (g){
 }
 
 adjust_names2 <- function (g){
+  # adjust namees in annotation to be consistent between different sources - alternative version
   if (is.null(g$source)){
     #  it is Inpactor2
     new_name <- ifelse(grepl("RLC", g$Name), "Class_I|LTR|Ty1/copia", g$Name)
@@ -479,6 +510,7 @@ adjust_names2 <- function (g){
 
 
 correct_attributes <- function(g){
+  # Adjust attribute names  from different sources to be consistent
   if (is.null(g$source)){
     #  it is Inpactor2
     g$Name <- g$name
@@ -498,7 +530,7 @@ correct_attributes <- function(g){
 
 
 gff_cleanup <- function(gff, wicker = FALSE){
-  ## remove overlapin annotation track - assign new annot
+  ## remove overlapin annotation track and assign new annot which is LCA of the original annot
   if (wicker){
     resolve_name_fun <- resolve_name_wicker
   }else{
@@ -540,7 +572,8 @@ check_for_overlaps <- function(g){
 }
 
 remove_overlaping_elements <- function(g){
-  # remove overlaping elements
+  # Remove overlaping elements - if two elements overlap, remove both of them
+  # because it is not clear which one is correct
   ovl <- findOverlaps(g, g, ignore.strand = TRUE)
   ovl <- ovl[from(ovl) != to(ovl)]
   to_rm <- unique(to(ovl))
@@ -551,67 +584,21 @@ remove_overlaping_elements <- function(g){
     g
 }
 
-get_overlaping_elements <- function(g){
-    # remove overlaping elements
-    ovl <- findOverlaps(g, g, ignore.strand = TRUE)
-    ovl <- ovl[from(ovl) != to(ovl)]
-    to_rm <- unique(to(ovl))
-    if (length(to_rm) > 0){
-        print(paste0("removing ", length(to_rm), " elements"))
-        g <- g[to_rm]
-    }
-    g
-
-}
-
 
 make_complete <- function(g, genome_gr){
   # fill in missing intervals, i.e. intervals without annotation
+  # this function is to use to make annotation 'complete' - each base is annotated either
+  # as annotated or as without annotation
   g_m <- GenomicRanges::setdiff(genome_gr, g, ignore.strand = TRUE)
   g_m$Name <- "no_annotation"
   g_c <- append(g, g_m)
   g_c
 }
 
-make_complete2 <- function(g, s){
-  SL <- seqlengths(s)
-  genome_gr <- GRanges(seqnames = names(SL), ranges = IRanges(start = 1, end = SL))
-    # fill in missing intervals, i.e. intervals without annotation
-  g_m <- GenomicRanges::setdiff(genome_gr, g, ignore.strand = TRUE)
-  g_m$Name <- "no_annotation"
-  g_c <- append(g, g_m)
-}
-
-
-
-
-extract_all_matches_as_gr <- function(annot_test, annot_ref){
-  g12 <- append(annot_test, annot_ref)
-  g12_dis <-  GenomicRanges::disjoin(g12, ignore.strand = TRUE)
-  # for each element in g12_dis find the corresponding element in g1
-  g1ovl <- findOverlaps(g12_dis, annot_ref, ignore.strand = TRUE)
-  g2ovl <- findOverlaps(g12_dis, annot_test, ignore.strand = TRUE)
-  # check if all is matched exactly once
-  if (all(from(g1ovl) == from(g2ovl))){
-    print("all elements matched exactly once")
-  }else{
-    print("not all elements matched exactly once")
-  }
-  g12_dis$ref <- annot_ref[to(g1ovl)]$Name
-  g12_dis$test <- annot_test[to(g2ovl)]$Name
-  g12_dis$Name <- paste0(g12_dis$ref, ":", g12_dis$test)
-  return(g12_dis)
-}
-sanitize_filename <- function(filename) {
-  # Replace special characters with a safe alternative
-  sanitized <- gsub("[/\\\\:*?\"<>|]", "-", filename)
-  return(sanitized)
-}
-
 
 extract_all_matches <- function(annot_test, annot_ref){
-  # annot_ref is the reference
-  # annot_test is the test
+  # annot_ref is the reference annotation
+  # annot_test is the test annotation
   # output is a data.frame with all identified matching pairs and the number of basepairs
   g12 <- append(annot_test, annot_ref)
   g12_dis <-  GenomicRanges::disjoin(g12, ignore.strand = TRUE)
@@ -634,6 +621,11 @@ extract_all_matches <- function(annot_test, annot_ref){
 }
 
 get_matched_granges <- function(annot_test, annot_ref){
+  # annot_ref is the reference annotation
+  # annot_test is the test annotation
+  # Output is a list of GenomicRanges objects with matched elements with overlapping genomic ranges
+  # and appended information about annotation in reference and test
+
   g12 <- append(annot_test, annot_ref)
   g12_dis <-  GenomicRanges::disjoin(g12, ignore.strand = TRUE)
   # for each element in g12_dis find the corresponding element in g1
@@ -648,6 +640,7 @@ get_matched_granges <- function(annot_test, annot_ref){
 
 
 evaluate_matches <- function (annot_pairs){
+  # helper function for getting confusion matrix
   Names <- annot_pairs[, 1]
   matches <- str_detect(annot_pairs[,2], fixed(Names))
   # NA in matches means that there was conflict in ref annot.
@@ -667,6 +660,8 @@ evaluate_matches <- function (annot_pairs){
 }
 
 get_confusion_matrix <- function(annot_pairs){
+  # calculate confusion matrix from annotation pairs  obtained from get_matched_granges
+
   p1 <- evaluate_matches(annot_pairs)
   p1m <- dcast(p1, ref ~ test, value.var = "basepairs", drop = FALSE)
   rownames(p1m) <- p1m$ref
@@ -697,7 +692,8 @@ get_stat_from_confusion_matrix <- function (cm){
 
 
 calculate_TP_TF_FP_FN_from_pairs_LTR_category <- function(ap){
-  tp_cases <- read.table("/mnt/raid/454_data/dante/reference_genomes/TP_FP_cases.csv", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+  # assing matched pairs to TP, TF, FP, FN based on TP_FP_cases.csv file
+  tp_cases <- read.table("reference_genomes/TP_FP_cases.csv", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
   error_type <- tp_cases$stat
   names(error_type) <- paste(tp_cases$ref, tp_cases$test, sep = "__")
   stat_call <- c(TP=0, FN=0, FP=0, TN=0)
@@ -731,7 +727,6 @@ calculate_statistics_from_groups <- function(stat_call){
     accuracy = unname((stat_call["TP"] + stat_call["TN"]) / sum(stat_call))
   )
   return(out)
-
 }
 
 

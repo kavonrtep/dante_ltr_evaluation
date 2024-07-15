@@ -1,10 +1,10 @@
 #!/usr/bin/env Rscript
 library(rtracklayer)
-source("/mnt/raid/454_data/dante/reference_genomes/compare_annot_utils.R")
+source("reference_genomes/compare_annot_utils.R")
 annot_test_str <- c(
-  DANTE_LTR="/mnt/raid/454_data/dante/reference_genomes/rice_v7/rice_v7.fasta_dante_ltr.gff3",
-  Inpactor2 = "/mnt/raid/454_data/dante/reference_genomes/rice_v7/rice_v7.fasta_inpactor2_c3/Inpactor2_predictions.bed",
-  EDTA = "/mnt/raid/454_data/dante/reference_genomes/rice_v7/rice_v7.fasta.mod.EDTA.raw/rice_v7.fasta.mod.LTR.intact.gff3"
+  DANTE_LTR="reference_genomes/rice_v7/rice_v7.fasta_dante_ltr.gff3",
+  Inpactor2 = "reference_genomes/rice_v7/rice_v7.fasta_inpactor2_c3/Inpactor2_predictions.bed",
+  EDTA = "reference_genomes/rice_v7/rice_v7.fasta.mod.EDTA.raw/rice_v7.fasta.mod.LTR.intact.gff3"
 )
 annot_test_str_gr_raw <- sapply(annot_test_str, import)
 
@@ -25,6 +25,6 @@ edta$Name <- edta$Classification
 edta <- remove_overlaping_elements(edta)
 
 # export to gff3
-export(dante_ltr, "/mnt/raid/454_data/dante/reference_genomes/rice_v7/rice_v7.fasta_dante_ltr.standardised.gff3", format = "gff3")
-export(inpactor2, "/mnt/raid/454_data/dante/reference_genomes/rice_v7/rice_v7.fasta_inpactor2_c3/Inpactor2_predictions_standartised.gff3", format = "gff3")
-export(edta,  "/mnt/raid/454_data/dante/reference_genomes/rice_v7/rice_v7.fasta.mod.EDTA.raw/rice_v7.fasta.mod.LTR.intact_standartised.gff3", format = "gff3")
+export(dante_ltr, "reference_genomes/rice_v7/rice_v7.fasta_dante_ltr.standardised.gff3", format = "gff3")
+export(inpactor2, "reference_genomes/rice_v7/rice_v7.fasta_inpactor2_c3/Inpactor2_predictions_standartised.gff3", format = "gff3")
+export(edta,  "reference_genomes/rice_v7/rice_v7.fasta.mod.EDTA.raw/rice_v7.fasta.mod.LTR.intact_standartised.gff3", format = "gff3")

@@ -14,18 +14,18 @@ output_dir <- "maize_B73_plots_rm"
 dir.create(output_dir, showWarnings = FALSE)
 
 ## INPUT DATA
-annot_std_gr <- import("/mnt/raid/454_data/dante/reference_genomes/maize_B73/v3_MIPS_Repeats_loci_adjusted_names.gff3")
+annot_std_gr <- import("reference_genomes/maize_B73/v3_MIPS_Repeats_loci_adjusted_names.gff3")
 p <- findOverlaps(annot_std_gr, annot_std_gr)
 ovlp <- p[!from(p) == to(p)]
 # not empty - the are overlaps!!, must be cleaned up
 # remove conflicts
 annot_std_gr <- gff_cleanup(annot_std_gr) # this takes ~ 10-15 min
 check_for_overlaps(annot_std_gr)
-# TODO
+
 annot_test_str <- c(
-    DANTE_LTR="/mnt/raid/454_data/dante/reference_genomes/maize_B73/libraries2/dante_ltr/B73_RefGen_v3_noAmbiguities.fa.gff3",
-    Inpactor2 = "/mnt/raid/454_data/dante/reference_genomes/maize_B73/libraries2/inpactor/B73_RefGen_v3_noAmbiguities.fa.gff3",
-    EDTA = "/mnt/raid/454_data/dante/reference_genomes/maize_B73/libraries2/edta/B73_RefGen_v3_noAmbiguities.fa.gff3"
+    DANTE_LTR="reference_genomes/maize_B73/libraries2/dante_ltr/B73_RefGen_v3_noAmbiguities.fa.gff3",
+    Inpactor2 = "reference_genomes/maize_B73/libraries2/inpactor/B73_RefGen_v3_noAmbiguities.fa.gff3",
+    EDTA = "reference_genomes/maize_B73/libraries2/edta/B73_RefGen_v3_noAmbiguities.fa.gff3"
 )
 library(Biostrings)
 s <- readDNAStringSet("maize_B73/B73_RefGen_v3_noAmbiguities.fa")
@@ -56,7 +56,7 @@ save.image(paste0(output_dir, "/annotation_overlaps_per_base_venn_all_RM.RData")
 
 
 makeVennDiagram_large <- function (gr_list){
-    # gr must be reducee!
+    # gr must be reduced!
     labels <- names(gr_list)
     # add labels to the source
     for (i in seq_along(gr_list)){
