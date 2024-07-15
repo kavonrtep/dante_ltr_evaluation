@@ -1,7 +1,7 @@
 library(rtracklayer)
-source("/mnt/raid/454_data/dante/reference_genomes/compare_annot_utils.R")
+source("compare_annot_utils.R")
 # adjust reference annotation
-annot_std_gr <- import("/mnt/raid/454_data/dante/reference_genomes/maize_B73/v3_MIPS_Repeats_loci_adjusted_names.gff3")
+annot_std_gr <- import("reference_genomes/maize_B73/v3_MIPS_Repeats_loci_adjusted_names.gff3")
 
 annot_std_gr_standardised <- annot_std_gr
 annot_std_gr_standardised$Name[annot_std_gr_standardised$Name == "Class_I|LTR|Ty1/copia"] <- "LTR/Copia"
@@ -9,9 +9,9 @@ annot_std_gr_standardised$Name[annot_std_gr_standardised$Name == "Class_I|LTR|Ty
 annot_std_gr_standardised$Name[annot_std_gr_standardised$Name == "Class_I|LTR|"] <- "LTR"
 
 annt_test_str <- c(
-  DANTE_LTR="/mnt/raid/454_data/dante/reference_genomes/maize_B73/B73_RefGen_v3.fa_dante_ltr.gff3",
-  Inpactor2 = "/mnt/raid/454_data/dante/reference_genomes/maize_B73/B73_RefGen_v3.fa_inpactor2_c3/Inpactor2_predictions.bed",
-  EDTA = "/mnt/raid/454_data/dante/reference_genomes/maize_B73/B73_RefGen_v3.fa.mod.EDTA.raw/B73_RefGen_v3.fa.mod.LTR.intact.gff3"
+  DANTE_LTR="reference_genomes/maize_B73/B73_RefGen_v3.fa_dante_ltr.gff3",
+  Inpactor2 = "reference_genomes/maize_B73/B73_RefGen_v3.fa_inpactor2_c3/Inpactor2_predictions.bed",
+  EDTA = "reference_genomes/maize_B73/B73_RefGen_v3.fa.mod.EDTA.raw/B73_RefGen_v3.fa.mod.LTR.intact.gff3"
 )
 annot_test_str_gr_raw <- sapply(annt_test_str, import)
 
@@ -32,16 +32,17 @@ edta$Name <- edta$Classification
 edta <- remove_overlaping_elements(edta)
 
 # export to gff3
-export(dante_ltr, "/mnt/raid/454_data/dante/reference_genomes/maize_B73/B73_RefGen_v3.fa_dante_ltr.standardised.gff3", format = "gff3")
-export(inpactor2, "/mnt/raid/454_data/dante/reference_genomes/maize_B73/B73_RefGen_v3.fa_inpactor2_c3/Inpactor2_predictions_standartised.gff3", format = "gff3")
-export(edta,  "/mnt/raid/454_data/dante/reference_genomes/maize_B73/B73_RefGen_v3.fa.mod.EDTA.raw/B73_RefGen_v3.fa.mod.LTR.intact_standartised.gff3", format = "gff3")
+export(dante_ltr, "reference_genomes/maize_B73/B73_RefGen_v3.fa_dante_ltr.standardised.gff3", format = "gff3")
+export(inpactor2, "reference_genomes/maize_B73/B73_RefGen_v3.fa_inpactor2_c3/Inpactor2_predictions_standartised.gff3", format = "gff3")
+export(edta,  "reference_genomes/maize_B73/B73_RefGen_v3.fa.mod.EDTA.raw/B73_RefGen_v3.fa.mod.LTR.intact_standartised.gff3", format = "gff3")
 
 # export standard annot
-export(annot_std_gr_standardised, "/mnt/raid/454_data/dante/reference_genomes/maize_B73/v3_MIPS_Repeats_loci_adjusted_names_standardised.gff3", format = "gff3")
+export(annot_std_gr_standardised, "reference_genomes/maize_B73/v3_MIPS_Repeats_loci_adjusted_names_standardised.gff3", format = "gff3")
 
-library(parallel)# it seems alot of feature is overlaping - this must be handed
+library(parallel)
+# it seems alot of feature is overlaping - this must be handed
 
 annot_std_gr_standardised_clean <- gff_cleanup(annot_std_gr_standardised)
 
-export(annot_std_gr_standardised_clean, "/mnt/raid/454_data/dante/reference_genomes/maize_B73/v3_MIPS_Repeats_loci_adjusted_names_standardised_clean.gff3", format = "gff3")
+export(annot_std_gr_standardised_clean, "reference_genomes/maize_B73/v3_MIPS_Repeats_loci_adjusted_names_standardised_clean.gff3", format = "gff3")
 
