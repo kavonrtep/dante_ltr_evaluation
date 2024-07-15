@@ -1,0 +1,17 @@
+name: r-environment
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base
+  - r-igraph
+  - r-ggvenn
+  - bioconductor-chippeakanno
+  - bioconductor-limma
+  - bioconductor-biostrings
+  - bioconductor-rtracklayer
+  - r-reshape2
+  - r-stringr
+  - r-fmsb
+  - r-grid
+  - bedtools

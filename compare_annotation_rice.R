@@ -11,14 +11,14 @@ source("compare_annot_utils.R")
 # standard annot for evaluation:
 
 ## INPUT DATA
-annot_std_gr <- import("rice_v7/riceTElib/rice_v7.fasta.gff3")
-dante <- import("/mnt/raid/454_data/dante/reference_genomes/rice_v7/rice_v7.fasta_dante.gff3", format = "gff3")
+annot_std_gr <- import("reference_genomes/rice_v7/riceTElib/rice_v7.fasta.gff3")
+dante <- import("reference_genomes/rice_v7/rice_v7.fasta_dante.gff3", format = "gff3")
 output_dir <- "rice_v7_plots"
 
 annot_test_str <- c(
-  DANTE_LTR="/mnt/raid/454_data/dante/reference_genomes/rice_v7/rice_v7.fasta_dante_ltr.gff3",
-  Inpactor2 = "/mnt/raid/454_data/dante/reference_genomes/rice_v7/rice_v7.fasta_inpactor2_c3/Inpactor2_predictions.bed",
-  EDTA = "/mnt/raid/454_data/dante/reference_genomes/rice_v7/rice_v7.fasta.mod.EDTA.raw/rice_v7.fasta.mod.LTR.intact.gff3"
+  DANTE_LTR="reference_genomes/rice_v7/rice_v7.fasta_dante_ltr.gff3",
+  Inpactor2 = "reference_genomes/rice_v7/rice_v7.fasta_inpactor2_c3/Inpactor2_predictions.bed",
+  EDTA = "reference_genomes/rice_v7/rice_v7.fasta.mod.EDTA.raw/rice_v7.fasta.mod.LTR.intact.gff3"
 )
 # genome size from ref seq
 library(Biostrings)
@@ -31,7 +31,7 @@ rice2rexdb <- read.table(
 rownames(rice2rexdb) <- rice2rexdb[,1]
 
 # info about TE protein domains:
-te_info <- read.table("/mnt/raid/users/petr/workspace/dante_ltr/databases/lineage_domain_order.csv", sep="\t", header=TRUE)
+te_info <- read.table("reference_genomes/lineage_domain_order.csv", sep="\t", header=TRUE)
 te_domain_info <- strsplit(te_info$Domains.order, " ")
 names(te_domain_info) <- gsub("_gypsy", "/gypsy", gsub("_copia", "/copia", gsub("/", "|", te_info$Lineage, fixed = TRUE)))
 

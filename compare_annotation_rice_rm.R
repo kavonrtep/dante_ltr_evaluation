@@ -16,9 +16,9 @@ dir.create(output_dir, showWarnings = FALSE)
 
 # annotation obtain with RM based on clustom libraries create from Inpactor2, edta and dante_ltr
 annot_test_str <- c(
-  DANTE_LTR="/mnt/raid/454_data/dante/reference_genomes/rice_v7/libraries/dante_ltr_repre/rice_v7.fasta.gff3",
-  Inpactor2 = "/mnt/raid/454_data/dante/reference_genomes/rice_v7/libraries/inpactor2/rice_v7.fasta.gff3",
-  EDTA = "/mnt/raid/454_data/dante/reference_genomes/rice_v7/libraries/edta/rice_v7.fasta.gff3"
+  DANTE_LTR="reference_genomes/rice_v7/libraries/dante_ltr_repre/rice_v7.fasta.gff3",
+  Inpactor2 = "reference_genomes/rice_v7/libraries/inpactor2/rice_v7.fasta.gff3",
+  EDTA = "reference_genomes/rice_v7/libraries/edta/rice_v7.fasta.gff3"
 )
 
 # genome size from ref seq
@@ -26,8 +26,7 @@ library(Biostrings)
 s <- readDNAStringSet("rice_v7/rice_v7.fasta")
 SL <- seqlengths(s)
 # conversion table - rice to rexdb names
-rice2rexdb <- read.table(
-  "rice_v7/riceTElib//rice7.0.0.liban_unique_categories_to_rexdb.csv",
+rice2rexdb <- read.table("reference_genomes/rice_v7/riceTElib//rice7.0.0.liban_unique_categories_to_rexdb.csv",
   sep = "\t", header = FALSE, as.is = TRUE)
 rownames(rice2rexdb) <- rice2rexdb[,1]
 

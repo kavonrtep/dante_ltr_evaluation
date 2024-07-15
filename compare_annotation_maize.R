@@ -12,7 +12,7 @@ source("compare_annot_utils.R")
 # standard annot for evaluation:
 
 ## INPUT DATA
-annot_std_gr <- import("/mnt/raid/454_data/dante/reference_genomes/maize_B73/v3_MIPS_Repeats_loci_adjusted_names.gff3")
+annot_std_gr <- import("reference_genomes/maize_B73/v3_MIPS_Repeats_loci_adjusted_names.gff3")
 # are there any conflicts, oveverlapping annotations?
 p <- findOverlaps(annot_std_gr, annot_std_gr)
 ovlp <- p[!from(p) == to(p)]
@@ -22,29 +22,29 @@ annot_std_gr <- gff_cleanup(annot_std_gr) # this takes ~ 10-15 min
 check_for_overlaps(annot_std_gr)
 
 
-dante <- import("/mnt/raid/454_data/dante/reference_genomes/maize_B73/B73_RefGen_v3.fa_dante.gff3", format = "gff3")
+dante <- import("reference_genomes/maize_B73/B73_RefGen_v3.fa_dante.gff3", format = "gff3")
 output_dir <- "maize_B73_plots"
 
 annot_test_str <- c(
-  DANTE_LTR="/mnt/raid/454_data/dante/reference_genomes/maize_B73/B73_RefGen_v3.fa_dante_ltr.gff3",
-  Inpactor2 = "/mnt/raid/454_data/dante/reference_genomes/maize_B73/B73_RefGen_v3.fa_inpactor2_c3/Inpactor2_predictions.bed",
-  EDTA = "/mnt/raid/454_data/dante/reference_genomes/maize_B73/B73_RefGen_v3.fa.mod.EDTA.raw/B73_RefGen_v3.fa.mod.LTR.intact.gff3"
+  DANTE_LTR="reference_genomes/maize_B73/B73_RefGen_v3.fa_dante_ltr.gff3",
+  Inpactor2 = "reference_genomes/maize_B73/B73_RefGen_v3.fa_inpactor2_c3/Inpactor2_predictions.bed",
+  EDTA = "reference_genomes/maize_B73/B73_RefGen_v3.fa.mod.EDTA.raw/B73_RefGen_v3.fa.mod.LTR.intact.gff3"
 )
 # genome size from ref seq
 library(Biostrings)
-s <- readDNAStringSet("/mnt/raid/454_data/dante/reference_genomes/maize_B73/B73_RefGen_v3.fa")
+s <- readDNAStringSet("reference_genomes/maize_B73/B73_RefGen_v3.fa")
 # remove string after space in seq names
 names(s) <- gsub(" .+$", "", names(s))
 SL <- seqlengths(s)
 # conversion table - rice to rexdb names
 
 # info about TE protein domains:
-te_info <- read.table("/mnt/raid/users/petr/workspace/dante_ltr/databases/lineage_domain_order.csv", sep="\t", header=TRUE)
+te_info <- read.table("reference_genomes/lineage_domain_order.csv", sep="\t", header=TRUE)
 te_domain_info <- strsplit(te_info$Domains.order, " ")
 names(te_domain_info) <- gsub("_gypsy", "/gypsy", gsub("_copia", "/copia", gsub("/", "|", te_info$Lineage, fixed = TRUE)))
 
 
-# geneome size:
+# genome size:
 gs <- sum(SL)
 # whole genome as GRanges
 genome_gr <- GRanges(seqnames = names(SL), ranges = IRanges(start = 1, end = SL))
