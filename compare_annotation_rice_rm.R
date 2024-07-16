@@ -8,6 +8,7 @@ library(igraph)
 library(ggvenn)
 library(ChIPpeakAnno)
 library(limma)
+# Load custom utility functions for annotation comparisons
 source("compare_annot_utils.R")
 # standard annot for evaluation:
 annot_std_gr <- import("rice_v7/riceTElib/rice_v7.fasta.gff3")
@@ -23,28 +24,29 @@ annot_test_str <- c(
 
 # genome size from ref seq
 library(Biostrings)
+# Load the genome sequence and calculate sequence lengths
 s <- readDNAStringSet("rice_v7/rice_v7.fasta")
 SL <- seqlengths(s)
-# conversion table - rice to rexdb names
+# Read conversion table mapping rice to rexdb names for annotation consistency
 rice2rexdb <- read.table("reference_genomes/rice_v7/riceTElib//rice7.0.0.liban_unique_categories_to_rexdb.csv",
   sep = "\t", header = FALSE, as.is = TRUE)
 rownames(rice2rexdb) <- rice2rexdb[,1]
 
-# gneome size:
+# Calculate the total genome size for further calculations
 gs <- sum(SL)
-# whole genome as GRanges
+# Calculate the total genome size for further calculations
 genome_gr <- GRanges(seqnames = names(SL), ranges = IRanges(start = 1, end = SL))
-# add seq sizes to all annots
+# Calculate the total genome size for further calculations
 seqlengths(annot_std_gr) <- SL[seqlevels(annot_std_gr)]
 seqlengths(genome_gr) <- SL[seqlevels(genome_gr)]
-# invert intervals in annot_std_gr and adjust names
+# Invert intervals in standard annotations and label unannotated regions
 annot_str_gr_inv <- setdiff(genome_gr, annot_std_gr, ignore.strand = TRUE)
 annot_str_gr_inv$Name <- "no_annotation"
 annot_std <-  c(annot_std_gr, annot_str_gr_inv)
 annot_std$ori_name <- annot_std$Name
 annot_std$Name <- rice2rexdb[annot_std$Name,2]
 annot_std$Name[is.na(annot_std$Name)] <- "Uknown"
-
+# Import test annotations using defined paths
 annot_test_str_gr_raw <- sapply(annot_test_str, import)
 annot_test_str_gr_raw_reduce <- sapply(annot_test_str_gr_raw, reduce)
 # calculate overlaps for venn diagram - per base
@@ -249,4 +251,3 @@ write.table(annot_pairs$Inpactor2, file = paste0(output_dir, "/annot_pairs_using
 
 
 save.image(paste0(output_dir, "/annot_stat_using_RM_annotated_genome.RData"))
-# load(paste0(output_dir, "/annot_stat_using_RM_annotated_genome.RData"))
